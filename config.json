@@ -1,0 +1,62 @@
+{
+  "settings": {
+    "max_workers": 4,
+    "log_level": "INFO"
+  },
+  "users": [
+    {
+      "id": "alice",
+      "quota": {
+        "max_concurrent": 2,
+        "max_total_executed": 3
+      }
+    },
+    {
+      "id": "bob",
+      "quota": {
+        "max_concurrent": 3,
+        "max_total_executed": 5
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "user_id": "alice",
+      "action": "sync",
+      "params": {
+        "target": "/data/x",
+        "bandwidth_limit_mb": 50
+      },
+      "config": {
+        "priority": 10,
+        "timeout_seconds": 15.0,
+        "max_retries": 1,
+        "retry_delay_seconds": 1.0
+      }
+    },
+    {
+      "user_id": "bob",
+      "action": "backup",
+      "params": {
+        "target": "/srv/y",
+        "compression": "gzip"
+      },
+      "config": {
+        "priority": 5,
+        "timeout_seconds": 30.0
+      }
+    },
+    {
+      "user_id": "alice",
+      "action": "delete",
+      "params": {
+        "target": "/tmp/z",
+        "force": true
+      },
+      "config": {
+        "priority": 8,
+        "timeout_seconds": 10.0
+      }
+    }
+  ]
+}

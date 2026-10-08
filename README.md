@@ -89,32 +89,73 @@ task_scheduling/
 
 ## Quick Start
 
-### 1. Run the Demonstration
+### 1. Run with Config File or Embedded Config
 
 Run the built-in runnable demonstration in `scheduler.py`:
 
 ```bash
+# Uses default config.json (or embedded dict if omitted)
 python3 scheduler.py
+
+# Or specify a custom configuration file
+python3 scheduler.py my_config.json
 ```
 
-Sample output:
-```text
-[2026-10-08 17:28:40] [INFO] [task_scheduling.main] [MainThread] Initializing task scheduling & resource limitation system...
-[2026-10-08 17:28:40] [INFO] [task_scheduling.quota] [MainThread] Registered user 'alice' with quota (max_concurrent=2, max_total=3)
-[2026-10-08 17:28:40] [INFO] [task_scheduling.quota] [MainThread] Registered user 'bob' with quota (max_concurrent=3, max_total=5)
-[2026-10-08 17:28:40] [INFO] [task_scheduling.scheduler.engine] [MainThread] Scheduled task 'facd0940...' for user 'alice' (action='sync', priority=10)
-[2026-10-08 17:28:40] [INFO] [task_scheduling.scheduler.engine] [MainThread] Scheduled task '233278a4...' for user 'bob' (action='backup', priority=5)
-[2026-10-08 17:28:40] [INFO] [task_scheduling.scheduler.engine] [MainThread] Scheduled task 'a1e5bd35...' for user 'alice' (action='delete', priority=8)
-[2026-10-08 17:28:40] [INFO] [task_scheduling.scheduler.engine] [MainThread] Scheduler tick started at 2026-10-08T10:28:40.632608+00:00
-[2026-10-08 17:28:40] [INFO] [task_scheduling.quota] [MainThread] Quota acquired for user 'alice' (active: 1, total executed: 0)
-[2026-10-08 17:28:40] [INFO] [task_scheduling.executor.handlers] [TaskWorker_0] Executing SYNC on target='/data/x' for user='alice'
-[2026-10-08 17:28:40] [INFO] [task_scheduling.quota] [MainThread] Quota acquired for user 'alice' (active: 2, total executed: 0)
-[2026-10-08 17:28:40] [INFO] [task_scheduling.executor.handlers] [TaskWorker_1] Executing DELETE on target='/tmp/z' for user='alice'
-[2026-10-08 17:28:40] [INFO] [task_scheduling.quota] [TaskWorker_0] Quota released for user 'alice' (success=True, active remaining: 1, total executed: 1)
-[2026-10-08 17:28:40] [INFO] [task_scheduling.quota] [MainThread] Quota acquired for user 'bob' (active: 1, total executed: 0)
-[2026-10-08 17:28:40] [INFO] [task_scheduling.executor.handlers] [TaskWorker_0] Executing BACKUP on target='/srv/y' for user='bob'
-[2026-10-08 17:28:40] [INFO] [task_scheduling.main] [MainThread] All scheduled tasks finished processing.
+---
+
+## Configuration File (`config.json`)
+
+You can configure users, quotas, actions, tasks, and worker limits entirely via JSON:
+
+```json
+{
+  "settings": {
+    "max_workers": 4,
+    "log_level": "INFO"
+  },
+  "users": [
+    {
+      "id": "alice",
+      "quota": {
+        "max_concurrent": 2,
+        "max_total_executed": 3
+      }
+    },
+    {
+      "id": "bob",
+      "quota": {
+        "max_concurrent": 3,
+        "max_total_executed": 5
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "user_id": "alice",
+      "action": "sync",
+      "params": {
+        "target": "/data/x",
+        "bandwidth_limit_mb": 50
+      },
+      "config": {
+        "priority": 10,
+        "timeout_seconds": 15.0,
+        "max_retries": 1,
+        "retry_delay_seconds": 1.0
+      }
+    }
+  ]
+}
 ```
+
+You can also load directly from any Python dictionary in code:
+
+```python
+from task_scheduling.config import load_config_from_dict
+
+app_config = load_config_from_dict(my_custom_dict)
+```
+
 
 ---
 
